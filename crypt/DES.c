@@ -2,9 +2,17 @@
 #include <stdint.h>
 #include "DES_tables.h"
 
+#define DES_BLOCK_BITS 64
+#define DES_KEY_BITS 64
+#define DES_SUBKEY_BITS 48
+#define DES_HALF_BLOCK_BITS 32
+#define DES_HALF_KEY_BITS 32
+#define DES_ROUNDS 16
+
 typedef uint64_t u64;
 typedef uint32_t u32;
 typedef uint8_t u8;
+
 
 u64 pc(u64 var, int pc[], int number) {
 	u64 numb = 0x00;
@@ -133,13 +141,14 @@ int main() {
 	u32 left = (u32)(plain_text >> 32);
 	u32 right = (u32)((plain_text << 32) >> 32);
 
-	for (int i = 0; i < 16; i++) {
+	for (int i = 0; i < DES_ROUNDS; i++) {
 		u32 temp_right = right;
 		u32 f_result = f(right, round_keys[i]);
 
 		right = left ^ f_result;
 		left = temp_right;
 	}
+
 	// 마지막 16번 라운드에서는 swap하지 않음. 그러므로 한번 더 스왑
 	u32 temp_swap = left;
 	left = right;
@@ -149,6 +158,5 @@ int main() {
 	cipher_text = ip(final_text, fp_table);
 
 	printf("암호문 (Ciphertext): 0x%016llx\n", cipher_text); // test vector : 0x3FA40E8A984D4815
-
 	return 0;
 }
