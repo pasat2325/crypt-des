@@ -24,7 +24,7 @@ inline u64 permute(u64 x, const int(&tab)[N]) {
 	return y;
 }
 
-u32 rotation_l(u32 num, u32 n) {
+u32 rol28(u32 num, u32 n) {
 	return (((num << n) & 0x0fffffff) | (num >> (28 - n)));
 }
 
@@ -91,8 +91,8 @@ int main() {
 	u32 key_28bit_l = (u32)(key_56bit >> 28);
 	u32 key_28bit_r = (u32)(key_56bit & 0x0fffffff);
 	for (int i = 0; i < 16; i++) {
-		key_28bit_l = rotation_l(key_28bit_l, rotations[i]);
-		key_28bit_r = rotation_l(key_28bit_r, rotations[i]);
+		key_28bit_l = rol28(key_28bit_l, rotations[i]);
+		key_28bit_r = rol28(key_28bit_r, rotations[i]);
 
 		u64 subkey_48bit = 0x00;
 		subkey_48bit = ((u64)key_28bit_l) << 28;
@@ -104,7 +104,7 @@ int main() {
 	// Encryption
 	plain_text = permute<64, 64>(plain_text, ip_table);
 	u32 LPT = (u32)(plain_text >> 32);
-	u32 RPT = (u32)((plain_text << 32) >> 32);
+	u32 RPT = (u32)(plain_text & 0xffffffff);
 	//init_round: encrypt(0), decrypt(15)
 	u64 final_text = feistel_rounds(LPT, RPT, round_keys, 0);
 	cipher_text = permute<64,64>(final_text, fp_table);
@@ -112,7 +112,7 @@ int main() {
 	// decryption
 	u64 permuted_cipher_text = permute<64, 64>(cipher_text, ip_table);
 	u32 dec_LPT = (u32)(permuted_cipher_text >> 32);
-	u32 dec_RPT = (u32)((permuted_cipher_text << 32) >> 32);
+	u32 dec_RPT = (u32)(permuted_cipher_text & 0xffffffff);
 	u64 dec_final_text = feistel_rounds(dec_LPT, dec_RPT, round_keys, 15);
 	u64 rec_plain_text = permute<64, 64>(dec_final_text, fp_table);
 	
