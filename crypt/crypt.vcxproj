@@ -123,7 +123,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DES.c" />
+    <ClCompile Include="DES.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DES_tables.h" />
